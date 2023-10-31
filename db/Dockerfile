@@ -1,10 +1,5 @@
 FROM golang:1.18 as build
-WORKDIR /app
-COPY go.mod .
-COPY go.sum .
-COPY .env .
-RUN go mod download # 依存関係を取得
-COPY main.go .
+WORKDIR /db
+COPY ./main.go ./go.mod ./go.sum ./.env /db/
+CMD ["go", "run", "main.go"]
 EXPOSE 8080
-RUN go build main.go
-CMD ["./main"]

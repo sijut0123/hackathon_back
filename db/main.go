@@ -32,10 +32,10 @@ func init() {
 		panic("Error loading .env file")
 	}
 	// DB接続のための準備
-	mysqlUser := os.Getenv("MYSQL_USER")
-	mysqlPwd := os.Getenv("MYSQL_PWD")
-	mysqlHost := os.Getenv("MYSQL_HOST")
-	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+	mysqlUser := "uttc"
+	mysqlPwd := "sogaeki100"
+	mysqlHost := "unix(/cloudsql/term4-seiji-kakitsu:us-central1:uttc)"
+	mysqlDatabase := "hackathon"
 
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	_db, err := sql.Open("mysql", connStr)
@@ -165,7 +165,7 @@ func main() {
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
 
-	// 8000番ポートでリクエストを待ち受ける
+	// 8080番ポートでリクエストを待ち受ける
 	log.Println("Listening...")
 	if err := http.ListenAndServe("localhost:8080", nil); err != nil {
 		log.Fatal(err)
