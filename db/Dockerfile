@@ -5,6 +5,6 @@ COPY go.sum .
 COPY .env .
 RUN go mod download # 依存関係を取得
 COPY main.go .
-EXPOSE 8000
+EXPOSE 8080
 RUN go build main.go
 CMD ["./main"]
