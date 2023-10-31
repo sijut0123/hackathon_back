@@ -4,7 +4,7 @@ COPY . .
 RUN go mod download
 RUN go build -o /go/bin/app
 CMD ["/go/bin/app"]
-EXPOSE 8080
+EXPOSE 8050
 
 
 
