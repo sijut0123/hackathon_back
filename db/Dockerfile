@@ -1,11 +1,6 @@
 FROM golang:1.18 as build
-WORKDIR /go/src/app
-COPY . .
-RUN go mod download
-RUN go build -o /go/bin/app
-CMD ["/go/bin/app"]
+WORKDIR /db
+COPY ./main.go ./go.mod ./go.sum ./.env /db/
+CMD ["go", "run", "main.go"]
 EXPOSE 8050
-
-
-
-
+ENV HOSTNAME "0.0.0.0"
