@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
 	"log"
 	"math/rand"
@@ -27,16 +26,18 @@ var db *sql.DB
 
 func init() {
 	// ①-1
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
-	// DB接続のための準備
-	mysqlUser := "uttc"
-	mysqlPwd := "sogaeki100"
-	mysqlHost := "unix(/cloudsql/term4-seiji-kakitsu:us-central1:uttc)"
-	mysqlDatabase := "hackathon"
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	//	panic("Error loading .env file")
+	//}
 
+	// DB接続のための準備
+	mysqlUser := os.Getenv("MYSQL_USER")
+	mysqlPwd := os.Getenv("MYSQL_PWD")
+	mysqlHost := os.Getenv("MYSQL_HOST")
+	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+
+	fmt.Printf("user:%s, pwd:%s, host:%s, database:%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	_db, err := sql.Open("mysql", connStr)
 
