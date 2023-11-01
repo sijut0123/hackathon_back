@@ -7,5 +7,4 @@ RUN echo 1
 RUN go mod download
 RUN echo 2
 RUN go build -o /go/bin/app
-RUN echo 3
 CMD ["/go/bin/app"]
