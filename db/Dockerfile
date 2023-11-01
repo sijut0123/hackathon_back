@@ -1,7 +1,7 @@
 FROM golang:1.18 as build
 WORKDIR /go/src/app
 ENV HOSTNAME "0.0.0.0"
-COPY . .
+COPY ./main.go .
 EXPOSE 8050
 RUN echo 1
 RUN go mod download
