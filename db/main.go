@@ -37,7 +37,6 @@ func init() {
 	mysqlHost := os.Getenv("MYSQL_HOST")
 	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
 
-	fmt.Printf("user:%s, pwd:%s, host:%s, database:%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	_db, err := sql.Open("mysql", connStr)
 
@@ -54,18 +53,21 @@ func init() {
 
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+	//この行を入れたらエラーが消えた
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
-		// ②-1
-		name := r.URL.Query().Get("name") // To be filled
-		if name == "" {
-			log.Println("fail: name is empty")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
 
 		// ②-2
-		rows, err := db.Query("SELECT id, name, age FROM user WHERE name = ?", name)
+		rows, err := db.Query("SELECT id, name, age FROM user WHERE name = ?")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -123,11 +125,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(requestData.Name) > 50 {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		if requestData.Age < 20 || requestData.Age > 80 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
