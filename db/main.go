@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/oklog/ulid/v2"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 	"unicode/utf8"
 )
 
@@ -71,7 +74,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
-		rows, err := db.Query("SELECT * FROM `contents`")
+		rows, err := db.Query("SELECT class, title, body, url FROM `contents`")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -103,6 +106,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes)
 	case http.MethodPost:
 		// POSTメソッドの処理
+		t := time.Now()
+		entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
+		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
 			Class string `json:"class"`
@@ -120,7 +126,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if requestData.Class == "" {
-			log.Println("fail: name is empty")
+			log.Println("fail: class is empty")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -131,28 +137,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (class, title, body, url) VALUES (?,?,?,?)", requestData.Class, requestData.Title, requestData.Body, requestData.Url)
+		_, err := db.Exec("INSERT INTO contents (id, class, title, body, url) VALUES (?,?,?,?,?)", id.String(), requestData.Class, requestData.Title, requestData.Body, requestData.Url)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
-			log.Println(1)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
-		log.Println(2)
-
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
-		log.Println(3)
-		//response := map[string]string{"class": requestData.Class}
-		//bytes, err := json.Marshal(response)
-		//if err != nil {
-		//	log.Printf("fail: json.Marshal, %v\n", err)
-		//	w.WriteHeader(http.StatusInternalServerError)
-		//	return
-		//}
-		//w.Header().Set("Content-Type", "application/json")
-		//w.Write(bytes)
+		response := map[string]string{"id": id.String()}
+		bytes, err := json.Marshal(response)
+		if err != nil {
+			log.Printf("fail: json.Marshal, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
 
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
