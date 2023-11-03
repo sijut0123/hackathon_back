@@ -5,14 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/oklog/ulid/v2"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 	"unicode/utf8"
 )
 
@@ -106,13 +103,12 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes)
 	case http.MethodPost:
 		// POSTメソッドの処理
-		t := time.Now()
-		entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
-		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
-			Name string `json:"name"`
-			Age  int    `json:"age"`
+			Class string `json:"class"`
+			Title string `json:"title"`
+			Body  string `json:"body"`
+			Url   string `json:"url"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
@@ -123,24 +119,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if requestData.Name == "" {
+		if requestData.Class == "" {
 			log.Println("fail: name is empty")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		if utf8.RuneCountInString(requestData.Name) > 50 {
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
-
-		if requestData.Age < 20 || requestData.Age > 80 {
+		if utf8.RuneCountInString(requestData.Class) > 50 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO user (id, name, age) VALUES (?,?, ?)", id.String(), requestData.Name, requestData.Age)
+		_, err := db.Exec("INSERT INTO contents (class, title, body, url) VALUES (?,?,?,?)", requestData.Class, requestData.Title, requestData.Body, requestData.Url)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -149,7 +140,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
-		response := map[string]string{"id": id.String()}
+		response := map[string]string{"class": requestData.Class}
 		bytes, err := json.Marshal(response)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
