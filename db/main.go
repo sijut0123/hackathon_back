@@ -134,12 +134,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		_, err := db.Exec("INSERT INTO contents (class, title, body, url) VALUES (?,?,?,?)", requestData.Class, requestData.Title, requestData.Body, requestData.Url)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
+			log.Println(1)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
+		log.Println(2)
+
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
+		log.Println(3)
 		//response := map[string]string{"class": requestData.Class}
 		//bytes, err := json.Marshal(response)
 		//if err != nil {
