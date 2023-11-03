@@ -69,16 +69,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		// ②-1
-		name := r.URL.Query().Get("name") // To be filled
-		if name == "" {
-			log.Println("fail: name is empty")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+		//name := r.URL.Query().Get("name") // To be filled
+		//if name == "" {
+		//	log.Println("fail: name is empty")
+		//	w.WriteHeader(http.StatusBadRequest)
+		//	return
+		//}
 
-		class := r.URL.Query().Get("name") // To be filled
+		class := r.URL.Query().Get("class")
 		if class == "" {
-			log.Println("fail: name is empty")
+			log.Println("fail: class is empty")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -160,7 +160,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO user (class, title, body, url) VALUES (?,?,?,?)", requestData.Class, requestData.Title, requestData.Body, requestData.URL)
+		_, err := db.Exec("INSERT INTO contents (class, title, body, url) VALUES (?,?,?,?)", requestData.Class, requestData.Title, requestData.Body, requestData.URL)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
