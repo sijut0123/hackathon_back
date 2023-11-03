@@ -140,15 +140,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
-		response := map[string]string{"class": requestData.Class}
-		bytes, err := json.Marshal(response)
-		if err != nil {
-			log.Printf("fail: json.Marshal, %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(bytes)
+		//response := map[string]string{"class": requestData.Class}
+		//bytes, err := json.Marshal(response)
+		//if err != nil {
+		//	log.Printf("fail: json.Marshal, %v\n", err)
+		//	w.WriteHeader(http.StatusInternalServerError)
+		//	return
+		//}
+		//w.Header().Set("Content-Type", "application/json")
+		//w.Write(bytes)
 
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
