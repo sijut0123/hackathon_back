@@ -23,10 +23,10 @@ type UserResForHTTPGet struct {
 }
 
 type ContentsData struct {
-	Class string `json:"class"`
-	Title string `json:"title"`
-	Body  string `json:"body"`
-	URL   string `json:"url"`
+	Category string `json:"category"`
+	Title    string `json:"title"`
+	Body     string `json:"body"`
+	URL      string `json:"url"`
 }
 
 // ① GoプログラムからMySQLへ接続
@@ -74,7 +74,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
-		rows, err := db.Query("SELECT class, title, body, url FROM `contents`")
+		rows, err := db.Query("SELECT category, title, body, url FROM `contents`")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -84,7 +84,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		contentsdata := make([]ContentsData, 0)
 		for rows.Next() {
 			var u ContentsData
-			if err := rows.Scan(&u.Class, &u.Title, &u.Body, &u.URL); err != nil {
+			if err := rows.Scan(&u.Category, &u.Title, &u.Body, &u.URL); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -111,10 +111,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
-			Class string `json:"class"`
-			Title string `json:"title"`
-			Body  string `json:"body"`
-			Url   string `json:"url"`
+			Category string `json:"category"`
+			Title    string `json:"title"`
+			Body     string `json:"body"`
+			Url      string `json:"url"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
@@ -125,19 +125,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if requestData.Class == "" {
-			log.Println("fail: class is empty")
+		if requestData.Category == "" {
+			log.Println("fail: category is empty")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		if utf8.RuneCountInString(requestData.Class) > 50 {
+		if utf8.RuneCountInString(requestData.Category) > 50 {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (id, class, title, body, url) VALUES (?,?,?,?,?)", id.String(), requestData.Class, requestData.Title, requestData.Body, requestData.Url)
+		_, err := db.Exec("INSERT INTO contents (id, category, title, body, url) VALUES (?,?,?,?,?)", id.String(), requestData.Category, requestData.Title, requestData.Body, requestData.Url)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
