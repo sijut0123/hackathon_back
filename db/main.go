@@ -21,7 +21,7 @@ type ContentsData struct {
 	Category   string `json:"category"`
 	Title      string `json:"title"`
 	Body       string `json:"body"`
-	Date       string `json:"date"`
+	Date       string `json:"datetime_column"`
 }
 
 // ① GoプログラムからMySQLへ接続
@@ -64,7 +64,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
-		rows, err := db.Query("SELECT curriculum, category, title, body, date FROM `contents`")
+		rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM `contents`")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -105,7 +105,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			Category   string `json:"category"`
 			Title      string `json:"title"`
 			Body       string `json:"body"`
-			Date       string `json:"date"`
+			Date       string `json:"datetime_column"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
@@ -128,7 +128,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (id,curriculum, category, title, body, date) VALUES (?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
+		_, err := db.Exec("INSERT INTO contents (id,curriculum, category, title, body, datetime_column) VALUES (?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
