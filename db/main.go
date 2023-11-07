@@ -16,28 +16,18 @@ import (
 	"unicode/utf8"
 )
 
-type UserResForHTTPGet struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
 type ContentsData struct {
-	Category string `json:"category"`
-	Title    string `json:"title"`
-	Body     string `json:"body"`
-	URL      string `json:"url"`
+	Curriculum string `json:"curriculum"`
+	Category   string `json:"category"`
+	Title      string `json:"title"`
+	Body       string `json:"body"`
+	Date       string `json:"date"`
 }
 
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
 func init() {
-	// ①-1
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	//	panic("Error loading .env file")
-	//}
 
 	// DB接続のための準備
 	mysqlUser := os.Getenv("MYSQL_USER")
@@ -74,7 +64,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 
-		rows, err := db.Query("SELECT category, title, body, url FROM `contents`")
+		rows, err := db.Query("SELECT curriculum, category, title, body, date FROM `contents`")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -84,7 +74,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		contentsdata := make([]ContentsData, 0)
 		for rows.Next() {
 			var u ContentsData
-			if err := rows.Scan(&u.Category, &u.Title, &u.Body, &u.URL); err != nil {
+			if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -111,10 +101,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
-			Category string `json:"category"`
-			Title    string `json:"title"`
-			Body     string `json:"body"`
-			Url      string `json:"url"`
+			Curriculum string `json:"curriculum"`
+			Category   string `json:"category"`
+			Title      string `json:"title"`
+			Body       string `json:"body"`
+			Date       string `json:"date"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
@@ -137,7 +128,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (id, category, title, body, url) VALUES (?,?,?,?,?)", id.String(), requestData.Category, requestData.Title, requestData.Body, requestData.Url)
+		_, err := db.Exec("INSERT INTO contents (id,curriculum, category, title, body, date) VALUES (?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
