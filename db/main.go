@@ -65,7 +65,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		curriculum := r.URL.Query().Get("curriculum")
-		if curriculum == "" {
+		if curriculum == "home" {
 			rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM contents")
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
