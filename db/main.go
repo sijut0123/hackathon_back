@@ -64,37 +64,69 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodGet:
-
-		rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM `contents`")
-		if err != nil {
-			log.Printf("fail: db.Query, %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		contentsdata := make([]ContentsData, 0)
-		for rows.Next() {
-			var u ContentsData
-			if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
-				log.Printf("fail: rows.Scan, %v\n", err)
-
-				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
-					log.Printf("fail: rows.Close(), %v\n", err)
-				}
+		curriculum := r.URL.Query().Get("curriculum")
+		if curriculum == "" {
+			rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM contents")
+			if err != nil {
+				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			contentsdata = append(contentsdata, u)
+			contentsdata := make([]ContentsData, 0)
+			for rows.Next() {
+				var u ContentsData
+				if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
+					log.Printf("fail: rows.Scan, %v\n", err)
+
+					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+						log.Printf("fail: rows.Close(), %v\n", err)
+					}
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				contentsdata = append(contentsdata, u)
+			}
+
+			bytes, err := json.Marshal(contentsdata)
+			if err != nil {
+				log.Printf("fail: json.Marshal, %v\n", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(bytes)
+		} else {
+			rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
+			if err != nil {
+				log.Printf("fail: db.Query, %v\n", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			contentsdata := make([]ContentsData, 0)
+			for rows.Next() {
+				var u ContentsData
+				if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
+					log.Printf("fail: rows.Scan, %v\n", err)
+
+					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+						log.Printf("fail: rows.Close(), %v\n", err)
+					}
+					w.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+				contentsdata = append(contentsdata, u)
+			}
+
+			bytes, err := json.Marshal(contentsdata)
+			if err != nil {
+				log.Printf("fail: json.Marshal, %v\n", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.Write(bytes)
 		}
 
-		bytes, err := json.Marshal(contentsdata)
-		if err != nil {
-			log.Printf("fail: json.Marshal, %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(bytes)
 	case http.MethodPost:
 		// POSTメソッドの処理
 		t := time.Now()
