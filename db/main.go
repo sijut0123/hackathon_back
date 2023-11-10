@@ -210,6 +210,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPut:
 		//PUTメソッドの処理
 		var requestData struct {
+			ID         string `json:"ID"`
 			Curriculum string `json:"curriculum"`
 			Category   string `json:"category"`
 			Title      string `json:"title"`
@@ -224,7 +225,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err := db.Exec("UPDATE contents SET curriculum = ?, category = ?, title = ?, body = ?, datetime_column = ?", requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
+		_, err := db.Exec("UPDATE contents SET curriculum = ?, category = ?, title = ?, body = ?, datetime_column = ? WHERE id = ?;", requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date, requestData.ID)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
