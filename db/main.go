@@ -207,7 +207,30 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(http.StatusOK)
+	case http.MethodPut:
+		//PUTメソッドの処理
+		var requestData struct {
+			Curriculum string `json:"curriculum"`
+			Category   string `json:"category"`
+			Title      string `json:"title"`
+			Body       string `json:"body"`
+			Date       string `json:"datetime_column"`
+		}
 
+		// HTTPリクエストボディからJSONデータを読み取る
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&requestData); err != nil {
+			log.Printf("fail: json.Decode, %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		_, err := db.Exec("UPDATE contents SET curriculum = ?, category = ?, title = ?, body = ?, datetime_column = ?", requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
+		if err != nil {
+			log.Printf("fail: db.Exec, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
 		w.WriteHeader(http.StatusBadRequest)
