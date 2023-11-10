@@ -62,7 +62,7 @@ func init() {
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "https://hackathon-front-one.vercel.app")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	//この行を入れたらエラーが消えた
@@ -188,6 +188,25 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
+	case http.MethodDelete:
+		//DELETEメソッドの処理
+		i := r.URL.Query().Get("id")
+
+		// Bookが見つからない場合は400エラーを返す
+		if i == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprint(w, "No Data found with given ID")
+			return
+		}
+
+		_, err := db.Exec("DELETE FROM contents where id = ?", i)
+		if err != nil {
+			log.Printf("fail: db.Exec, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
