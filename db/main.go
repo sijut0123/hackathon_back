@@ -68,9 +68,14 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		curriculum := r.URL.Query().Get("curriculum")
 		id := r.URL.Query().Get("id")
+		// 新たに追加
+		log.Printf("Received GET request. Curriculum: %s, ID: %s\n", curriculum, id)
+
 		if curriculum == "home" {
 			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id")
 			if err != nil {
+				log.Printf("fail: db.Query, %v\n", err)
+				// 新たに追加
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -102,6 +107,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id WHERE id = ?", id)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
+				// 新たに追加
+				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -131,6 +138,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		} else {
 			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id WHERE curriculum = ?", curriculum)
 			if err != nil {
+				log.Printf("fail: db.Query, %v\n", err)
+				// 新たに追加
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
