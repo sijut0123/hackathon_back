@@ -26,14 +26,6 @@ type GetContentsData struct {
 	Date       string `json:"datetime_column"`
 }
 
-type ContentsData struct {
-	Curriculum string `json:"curriculum"`
-	Category   string `json:"category"`
-	Title      string `json:"title"`
-	Body       string `json:"body"`
-	Date       string `json:"datetime_column"`
-}
-
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
@@ -107,16 +99,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else if id != "" {
-			rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM contents WHERE id = ?", id)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE id = ?", id)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			contentsdata := make([]ContentsData, 0)
+			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
-				var u ContentsData
-				if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
+				var u GetContentsData
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -137,16 +129,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else {
-			rows, err := db.Query("SELECT curriculum, category, title, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			contentsdata := make([]ContentsData, 0)
+			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
-				var u ContentsData
-				if err := rows.Scan(&u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
+				var u GetContentsData
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
