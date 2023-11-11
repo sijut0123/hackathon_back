@@ -129,7 +129,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else {
-			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents INNER JOIN curriculums ON id = data_id WHERE curriculum = ?", curriculum)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id WHERE curriculum = ?", curriculum)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
