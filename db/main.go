@@ -204,7 +204,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		for i := 0; i < len(requestData.Curriculum); i++ {
 			entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
 			curriculumID := ulid.MustNew(ulid.Timestamp(t), entropy)
-			_, err := db.Exec("INSERT INTO curriculums (id,user_id, curriculum) VALUES (?, ?, ?)", curriculumID, id.String(), requestData.Curriculum[i])
+			_, err := db.Exec("INSERT INTO curriculums (id,data_id, curriculum) VALUES (?, ?, ?)", curriculumID, id.String(), requestData.Curriculum[i])
 			if err != nil {
 				log.Printf("fail: db.Exec, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
