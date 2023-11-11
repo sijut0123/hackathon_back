@@ -178,6 +178,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&requestData); err != nil {
 			log.Printf("fail: json.Decode, %v\n", err)
+			log.Print("test0")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -197,31 +198,32 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		_, err := db.Exec("INSERT INTO content (id , category, title, body, datetime_column) VALUES (?,?,?,?,?)", id.String(), requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
+			log.Print("test1")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Println("test1")
 		for i := 0; i < len(requestData.Curriculum); i++ {
+			t := time.Now()
 			entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
 			curriculumID := ulid.MustNew(ulid.Timestamp(t), entropy)
-			_, err := db.Exec("INSERT INTO curriculums (id,data_id, curriculum) VALUES (?, ?, ?)", curriculumID, id.String(), requestData.Curriculum[i])
+			_, err := db.Exec("INSERT INTO curriculums (id, data_id, curriculum) VALUES (?, ?, ?)", curriculumID, id.String(), requestData.Curriculum[i])
 			if err != nil {
 				log.Printf("fail: db.Exec, %v\n", err)
+				log.Print("test2")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 		}
-		log.Println("test2")
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
 		response := map[string]string{"id": id.String()}
 		bytes, err := json.Marshal(response)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
+			log.Print("test3")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		log.Println("test3")
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	case http.MethodDelete:
