@@ -167,11 +167,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
-			Curriculum string `json:"curriculum"`
-			Category   string `json:"category"`
-			Title      string `json:"title"`
-			Body       string `json:"body"`
-			Date       string `json:"datetime_column"`
+			Curriculum []string `json:"curriculum"`
+			Category   string   `json:"category"`
+			Title      string   `json:"title"`
+			Body       string   `json:"body"`
+			Date       string   `json:"datetime_column"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
@@ -194,13 +194,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (id ,curriculum, category, title, body, datetime_column) VALUES (?,?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
+		_, err := db.Exec("INSERT INTO content (id , category, title, body, datetime_column) VALUES (?,?,?,?,?)", id.String(), requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
+		for i := 0; i < len(requestData.Curriculum); i++ {
+			_, err := db.Exec("INSERT INTO curriculums (id, curriculum) VALUES (?, ?)", id.String(), requestData.Curriculum[i])
+			if err != nil {
+				log.Printf("fail: db.Exec, %v\n", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+		}
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
 		response := map[string]string{"id": id.String()}
