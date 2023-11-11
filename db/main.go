@@ -200,6 +200,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Println("test1")
 		for i := 0; i < len(requestData.Curriculum); i++ {
 			_, err := db.Exec("INSERT INTO curriculums (id, curriculum) VALUES (?, ?)", id.String(), requestData.Curriculum[i])
 			if err != nil {
@@ -208,6 +209,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
+		log.Println("test2")
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
 		response := map[string]string{"id": id.String()}
@@ -217,6 +219,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Println("test3")
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	case http.MethodDelete:
