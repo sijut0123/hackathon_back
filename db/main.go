@@ -22,7 +22,6 @@ type GetContentsData struct {
 	Curriculum string `json:"curriculum"`
 	Category   string `json:"category"`
 	Title      string `json:"title"`
-	Url        string `json:"url"`
 	Body       string `json:"body"`
 	Date       string `json:"datetime_column"`
 }
@@ -54,7 +53,6 @@ func init() {
 
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	w.Header().Set("Access-Control-Allow-Origin", "https://hackathon-front-one.vercel.app")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -70,7 +68,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		curriculum := r.URL.Query().Get("curriculum")
 		id := r.URL.Query().Get("id")
 		if curriculum == "home" {
-			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents")
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents")
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -79,7 +77,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
@@ -99,7 +97,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else if id != "" {
-			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE id = ?", id)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE id = ?", id)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -108,7 +106,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -129,7 +127,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else {
-			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
@@ -138,7 +136,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -170,7 +168,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			Curriculum string `json:"curriculum"`
 			Category   string `json:"category"`
 			Title      string `json:"title"`
-			URL        string `json:"url"`
 			Body       string `json:"body"`
 			Date       string `json:"datetime_column"`
 		}
@@ -195,7 +192,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO contents (id ,curriculum, category, title, url, body, datetime_column) VALUES (?,?,?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.URL, requestData.Body, requestData.Date)
+		_, err := db.Exec("INSERT INTO contents (id ,curriculum, category, title, body, datetime_column) VALUES (?,?,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -239,7 +236,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			Curriculum string `json:"curriculum"`
 			Category   string `json:"category"`
 			Title      string `json:"title"`
-			URL        string `json:"url"`
 			Body       string `json:"body"`
 			Date       string `json:"datetime_column"`
 		}
@@ -251,7 +247,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		_, err := db.Exec("UPDATE contents SET curriculum = ?, category = ?, title = ?, url = ?, body = ?, datetime_column = ? WHERE id = ?;", requestData.Curriculum, requestData.Category, requestData.Title, requestData.URL, requestData.Body, requestData.Date, requestData.ID)
+		_, err := db.Exec("UPDATE contents SET curriculum = ?, category = ?, title = ?, body = ?, datetime_column = ? WHERE id = ?;", requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date, requestData.ID)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
