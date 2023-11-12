@@ -68,14 +68,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		curriculum := r.URL.Query().Get("curriculum")
 		id := r.URL.Query().Get("id")
-		// 新たに追加
-		log.Printf("Received GET request. Curriculum: %s, ID: %s\n", curriculum, id)
-
 		if curriculum == "home" {
-			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id")
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents")
 			if err != nil {
-				log.Printf("fail: db.Query, %v\n", err)
-				// 新たに追加
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -104,10 +99,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else if id != "" {
-			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id WHERE id = ?", id)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE id = ?", id)
 			if err != nil {
-				log.Printf("fail: db.Query, %v\n", err)
-				// 新たに追加
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -136,10 +129,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.Write(bytes)
 		} else {
-			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM content INNER JOIN curriculums ON id = data_id WHERE curriculum = ?", curriculum)
+			rows, err := db.Query("SELECT id, curriculum, category, title, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
 			if err != nil {
-				log.Printf("fail: db.Query, %v\n", err)
-				// 新たに追加
 				log.Printf("fail: db.Query, %v\n", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -176,18 +167,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		id := ulid.MustNew(ulid.Timestamp(t), entropy)
 
 		var requestData struct {
-			Curriculum []string `json:"curriculum"`
-			Category   string   `json:"category"`
-			Title      string   `json:"title"`
-			Body       string   `json:"body"`
-			Date       string   `json:"datetime_column"`
+			Curriculum string `json:"curriculum"`
+			Category   string `json:"category"`
+			Title      string `json:"title"`
+			Body       string `json:"body"`
+			Date       string `json:"datetime_column"`
 		}
 
 		// HTTPリクエストボディからJSONデータを読み取る
 		decoder := json.NewDecoder(r.Body)
 		if err := decoder.Decode(&requestData); err != nil {
 			log.Printf("fail: json.Decode, %v\n", err)
-			log.Print("test0")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
@@ -204,24 +194,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// データベースにINSERT
-		_, err := db.Exec("INSERT INTO content (id , category, title, body, datetime_column) VALUES (?,?,?,?,?)", id.String(), requestData.Category, requestData.Title, requestData.Body, requestData.Date)
+		_, err := db.Exec("INSERT INTO contents (id ,curriculum, category, title, body, datetime_column) VALUES (?,? ,?,?,?,?)", id.String(), requestData.Curriculum, requestData.Category, requestData.Title, requestData.Body, requestData.Date)
 		if err != nil {
 			log.Printf("fail: db.Exec, %v\n", err)
-			log.Print("test1")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		}
-		for i := 0; i < len(requestData.Curriculum); i++ {
-			t := time.Now()
-			entropy := ulid.Monotonic(rand.New(rand.NewSource(t.UnixNano())), 0)
-			curriculumID := ulid.MustNew(ulid.Timestamp(t), entropy)
-			_, err := db.Exec("INSERT INTO curriculums (id, data_id, curriculum) VALUES (?, ?, ?)", curriculumID.String(), id.String(), requestData.Curriculum[i])
-			if err != nil {
-				log.Printf("fail: db.Exec, %v\n", err)
-				log.Print("test2")
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
 		}
 		// 成功した場合のレスポンス
 		w.WriteHeader(http.StatusOK)
@@ -229,10 +206,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		bytes, err := json.Marshal(response)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
-			log.Print("test3")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		log.Println("test3")
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 	case http.MethodDelete:
