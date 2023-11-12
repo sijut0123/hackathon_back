@@ -73,6 +73,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents")
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
+				log.Printf("test1")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -85,6 +86,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
+					log.Printf("test2")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -94,6 +96,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
+				log.Printf("test3")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -103,6 +106,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE id = ?", id)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
+				log.Printf("test4")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -115,6 +119,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
+					log.Printf("test5")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -124,6 +129,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
+				log.Printf("test6")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -133,6 +139,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
+				log.Printf("test7")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -145,6 +152,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
+					log.Printf("test8")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -154,6 +162,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
+				log.Printf("test9")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -221,7 +230,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		// Bookが見つからない場合は400エラーを返す
 		if i == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprint(w, "No Data found with given ID")
+			fmt.Printf("No Data found with given ID")
 			return
 		}
 
