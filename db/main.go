@@ -22,7 +22,7 @@ type GetContentsData struct {
 	Curriculum string `json:"curriculum"`
 	Category   string `json:"category"`
 	Title      string `json:"title"`
-	URL        string `json:"url"`
+	Url        string `json:"url"`
 	Body       string `json:"body"`
 	Date       string `json:"datetime_column"`
 }
@@ -73,20 +73,17 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents")
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
-				log.Printf("test1")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.URL, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
-
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
-					log.Printf("test2")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -96,7 +93,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
-				log.Printf("test3")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -106,20 +102,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE id = ?", id)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
-				log.Printf("test4")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.URL, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
-					log.Printf("test5")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -129,7 +123,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
-				log.Printf("test6")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
@@ -139,20 +132,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			rows, err := db.Query("SELECT id, curriculum, category, title, url, body, datetime_column FROM contents WHERE curriculum = ?", curriculum)
 			if err != nil {
 				log.Printf("fail: db.Query, %v\n", err)
-				log.Printf("test7")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
 			contentsdata := make([]GetContentsData, 0)
 			for rows.Next() {
 				var u GetContentsData
-				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.URL, &u.Body, &u.Date); err != nil {
+				if err := rows.Scan(&u.Id, &u.Curriculum, &u.Category, &u.Title, &u.Url, &u.Body, &u.Date); err != nil {
 					log.Printf("fail: rows.Scan, %v\n", err)
 
 					if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
 						log.Printf("fail: rows.Close(), %v\n", err)
 					}
-					log.Printf("test8")
 					w.WriteHeader(http.StatusInternalServerError)
 					return
 				}
@@ -162,7 +153,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			bytes, err := json.Marshal(contentsdata)
 			if err != nil {
 				log.Printf("fail: json.Marshal, %v\n", err)
-				log.Printf("test9")
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
